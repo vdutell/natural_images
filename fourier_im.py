@@ -100,8 +100,8 @@ def get_mean_ps(filelist, cosine_window, imtype, ims_raw=False):
     '''
     
     try:
-        mean_power_spec = pickle.load(open(f'./output/mean_power_coswin_{cosine_window}.pkl'))
-        mean_fq_spec = pickle.load(open(f'./output/mean_fqspec_coswin_{cosine_window}.pkl'))
+        mean_power_spec = pickle.load(open(f'./output/mean_power_coswin_{cosine_window}_{imtype}.pkl'))
+        mean_fq_spec = pickle.load(open(f'./output/mean_fqspec_coswin_{cosine_window}_{imtype}.pkl'))
 
     except:
         print(f'Couldn\'t find mean power spectrum: Calculting now from {len(filelist)}  frames...')
@@ -127,58 +127,10 @@ def get_mean_ps(filelist, cosine_window, imtype, ims_raw=False):
         mean_power_spec /= (len(filelist))
         
         print('Saving...',end='')
-        pickle.dump(mean_power_spec, open(f'./output/mean_power_coswin_{cosine_window}.pkl', 'wb'))
-        pickle.dump(fq_spec, open(f'./output/mean_fqspec_coswin_{cosine_window}.pkl', 'wb'))
+        pickle.dump(mean_power_spec, open(f'./output/mean_power_coswin_{cosine_window}_{imtype}.pkl', 'wb'))
+        pickle.dump(fq_spec, open(f'./output/mean_fqspec_coswin_{cosine_window}_{imtype}.pkl', 'wb'))
         
     return(mean_power_spec, fq_spec)
-
-
-def get_mean_ps_flow(f, data,frameshape, flow_type, data_subset, cosine_window):
-    '''
-    Load in or calcuate the mean flow power spectrum from the dataset
-    Params:
-        f: flow files
-        data: dataset of flow data
-        chunklen: how large of chunks can we read in at a time? *I think we may not need this...*
-        frameshape: width and height of flow fields
-        flow_type: 'raw' or 'retinal'
-        data_subset: 'all' or 'walking'
-        cosine_window: Mutiply by a cosine window (to avoid edge artifacts)?
-    Returns:
-        mean_flow: one flow frame representign the mean of data.    
-    '''
-    
-    try:
-        mean_power_spec_u = pickle.load(open(f'./output/matthis/flow/mean_flow_power_{flow_type}_{data_subset}_u_coswin_{cosine_window}.pkl','rb'))
-        mean_power_spec_v = pickle.load(open(f'./output/matthis/flow/mean_flow_power_{flow_type}_{data_subset}_v_coswin_{cosine_window}.pkl','rb'))
-        fq_spec_u = pickle.load(open(f'./output/matthis/flow/mean_flow_spec_{flow_type}_{data_subset}_u_coswin_{cosine_window}.pkl','rb'))
-        fq_spec_v = pickle.load(open(f'./output/matthis/flow/mean_flow_spec_{flow_type}_{data_subset}_v_coswin_{cosine_window}.pkl','rb'))
-        print(f'Found Mean Flow Power Already Calculated for {flow_type}! Done!')
-    except:
-        print(f'Couldn\'t find mean flow frame for flow type \'{flow_type}\',\'{data_subset}\': Calculting now from {max(data) - min(data)} flow frames...')
-        #book keeping
-        mean_power_spec_u = np.zeros((frameshape)).astype('float32')
-        mean_power_spec_v = np.zeros((frameshape)).astype('float32')
-
-        #loop through video and get chunks of chunklen
-        i = 0 #frame num sampling from
-        for i in range(min(data), max(data)):
-            flow = np.nan_to_num(f[str(i)])
-            pu, fq_spec_u = spatialft(flow[:,:,0], cosine_window=cosine_window)
-            pv, fq_spec_v = spatialft(flow[:,:,1], cosine_window=cosine_window)
-            mean_power_spec_u += pu
-            mean_power_spec_v += pv
-
-        mean_power_spec_u /= (max(data) - min(data))
-        mean_power_spec_v /= (max(data) - min(data))
-        
-        print('Saving...',end='')
-        pickle.dump(mean_power_spec_u, open(f'./output/matthis/flow/mean_flow_power_{flow_type}_{data_subset}_u_coswin_{cosine_window}.pkl', 'wb'))       
-        pickle.dump(mean_power_spec_v, open(f'./output/matthis/flow/mean_flow_power_{flow_type}_{data_subset}_v_coswin_{cosine_window}.pkl', 'wb'))
-        pickle.dump(fq_spec_u, open(f'./output/matthis/flow/mean_flow_spec_{flow_type}_{data_subset}_u_coswin_{cosine_window}.pkl', 'wb'))       
-        pickle.dump(fq_spec_v, open(f'./output/matthis/flow/mean_flow_spec_{flow_type}_{data_subset}_v_coswin_{cosine_window}.pkl', 'wb'))
-        print('Done!')
-    return(mean_power_spec_u, mean_power_spec_v, fq_spec_u, fq_spec_v)
 
 
 def azimuthalAverage(image, nyquist, center=None, bin_in_log=False):
