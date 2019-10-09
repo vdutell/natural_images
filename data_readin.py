@@ -23,7 +23,7 @@ def readin_vanhateren_img(fname):
 
 
 #readin Image
-def readin_em_img(fname):
+def readin_jpg_img(fname):
     '''
     Readin a single em image
     '''
@@ -34,7 +34,7 @@ def readin_em_img(fname):
 def readin_img(fname, imtype):
     if(imtype=='vanhateren'):
         return(readin_vanhateren_img(fname))
-    elif(imtype=='em'):
-        return(readin_em_img(fname))
+    elif(imtype in ['em','astro']):
+        return(readin_jpg_img(fname))
     else:
         raise ValueError(f'imtype of {imtype} not supported.')
