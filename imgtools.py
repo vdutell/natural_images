@@ -31,8 +31,9 @@ def crop_ims(ims, edgesize=None, area='middle'):
             lr_replicates=False
         
         if(area=='middle'):
-            newim = im[h_im_h - h_crop_h:h_im_h + h_crop_h+1, # crop height
-                       h_im_w - h_crop_w:h_im_w + h_crop_w] # crop width  
+            addon = [d%2for d in  np.shape(ims[0])]
+            newim = im[h_im_h - h_crop_h:h_im_h + h_crop_h+addon[0], # crop height
+                       h_im_w - h_crop_w:h_im_w + h_crop_w+addon[0]] # crop width
             newims.append(newim)
 
         elif(area=='top'):
