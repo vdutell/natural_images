@@ -28,23 +28,26 @@ def spatialft(image, cosine_window=True, rmdc=True):
     return(ps, fqs)
 
 
-def get_logspace_contours(raw_field, c_levels=None):
+def get_contours(raw_field, c_levels=None, log=True):
     """Get the contour locations by percentage of max power in logspace"""
     
     # settings for contour plots
     if not c_levels:
         c_levels = np.array([0.1, 0.3, 0.5, 0.7, 0.9]) # energy percentages to contour
 
-    log_field = np.log10(raw_field)
-    t_contours = c_levels * log_field.max()
-    linear_t_contours = 10**t_contours
+    if(log):
+        log_field = np.log10(raw_field)
+        t_contours = c_levels * log_field.max()
+        linear_t_contours = 10**t_contours
+    else:
+        linear_t_contours = c_levels * raw_field.max()
     
     return(c_levels, linear_t_contours)
 
 def interp_get_contours(ps):
     interp_val = 5
     interp = scipy.ndimage.filters.gaussian_filter(ps, interp_val)
-    clevels, contours = get_logspace_contours(interp)
+    clevels, contours = get_contours(interp, log=True)
     return(interp, contours, clevels)
 
 def contour_plotter(ps, fqs, bar=True, ticks=True, title='Power Contour'):
@@ -163,14 +166,18 @@ def azimuthalAverage(image, nyquist, center=None, bin_in_log=False):
         bin_edges = np.histogram_bin_edges(np.log(r), num_bins)
         bin_edges = np.exp(bin_edges)
     else:
-        bin_edges = np.histogram_bin_edges(r,num_bins)
-    
-    r_binned = np.digitize(r, bin_edges)
-    binmean = np.zeros(num_bins)
-    for i in range(num_bins):
-        binmean[i] = np.mean(image[np.where(r_binned==i+1)])
+        bin_edges = np.histogram_bin_edges(r, num_bins)
+        
     bin_centers = bin_edges[:-1] + ((bin_edges[1]-bin_edges[0])/2)
     bin_centers = bin_centers/np.max(bin_centers)*nyquist
+
+    bin_edges[0] -= 1
+    bin_edges[-1] += 1
+    
+    r_binned = np.digitize(r, bin_edges) - 1
+    binmean = np.zeros(num_bins)
+    for i in range(num_bins):
+        binmean[i] = np.mean(image[np.where(r_binned==(i))])
 
     return(binmean, bin_centers)
 
