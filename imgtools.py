@@ -24,7 +24,6 @@ def crop_ims(ims, dims=None, area='middle'):
     newims = []
     print(h_crop_h, h_crop_w)
     for i, im in enumerate(ims):
-        print(im.shape)
 
         # print(np.shape(im))
         im_h = np.shape(im)[0]
